@@ -1628,6 +1628,10 @@ function WebGLRenderer( parameters ) {
 
 				material.needsUpdate = true;
 
+			} else if ( object.receiveShadow ) {
+
+				material.needsUpdate = true;
+
 			}
 
 		}

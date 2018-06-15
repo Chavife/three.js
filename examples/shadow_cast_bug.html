@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js shadow cast bug</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+                background-color: #000;
+                margin: 0px;
+                overflow: hidden;
+            }
+
+		</style>
+	</head>
+	<body>
+
+		<script src="../build/three.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script>
+
+			var mesh, renderer, scene, camera, controls, renderStats;
+            var lightArray = [];
+
+            init();
+            animate();
+
+            function init() {
+
+                renderer = new THREE.WebGLRenderer( { antialias: true } );
+                renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer.setPixelRatio( window.devicePixelRatio );
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                document.body.appendChild( renderer.domElement );
+
+                scene = new THREE.Scene();
+
+                scene.add( new THREE.AxisHelper( 20 ) );
+
+                camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
+                camera.position.set( 50, 50, 10 );
+
+                controls = new THREE.OrbitControls( camera, renderer.domElement );
+                controls.minDistance = 20;
+                controls.maxDistance = 200;
+                controls.enablePan = false;
+
+                var geometry = new THREE.SphereGeometry( 5, 12, 8 );
+
+                var material = new THREE.MeshPhongMaterial();
+
+                sphere = new THREE.Mesh( geometry, material );
+                sphere.castShadow = true;
+            	//sphere.receiveShadow = true; // un-comment to show shadow on plane <=========
+                scene.add( sphere );
+
+                var geometry2 = new THREE.PlaneGeometry( 100, 100 );
+                var plane = new THREE.Mesh( geometry2, material );
+                plane.rotation.x = - Math.PI / 2;
+                plane.position.set( 0, - 5, 0 );
+                plane.receiveShadow = true;
+                scene.add( plane );
+            //	plane.renderOrder = - 1; // un-comment to show shadow on plane <=========
+
+                createLights();
+
+            }
+
+            function createLights() {
+
+                scene.add( new THREE.AmbientLight( 0xffffff, 0.3 ) );
+
+                // light
+                var light = new THREE.SpotLight( 0xff0000, 0.3 );
+                light.position.set( 20, 20, 0 );
+                light.castShadow = true;
+                light.shadow.mapSize.width = 1024;
+                light.shadow.mapSize.height = 1024;
+                lightArray.push( light );
+                scene.add( light );
+
+                //
+
+                var light = new THREE.DirectionalLight( 0x00ff00, 0.3 );
+                light.position.set( 0, 20, 20 );
+                light.castShadow = true;
+                light.shadow.mapSize.width = 1024;
+                light.shadow.mapSize.height = 1024;
+                lightArray.push( light );
+                scene.add( light );
+
+                //
+
+                var light = new THREE.SpotLight( 0x0000ff, 0.3 );
+                light.position.set( 0, 20, - 20 );
+                light.castShadow = true;
+                light.shadow.mapSize.width = 1024;
+                light.shadow.mapSize.height = 1024;
+                lightArray.push( light );
+                scene.add( light );
+
+            }
+
+
+            function animate() {
+
+                renderer.render( scene, camera );
+
+                requestAnimationFrame( animate );
+
+            }
+
+
+
+		</script>
+
+	</body>
+</html>
