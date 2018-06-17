@@ -1608,21 +1608,24 @@ function WebGLRenderer( parameters ) {
 
 		}
 
+
+		//Probably there's a better way of finding such a collision
 		var shadowNeedsUpdate = false;
 		if(scene !== undefined){
 
-			var sceneobjects = scene.children;
+			scene.traverse( function ( sceneobject ) {
 
-			for ( var i = 0; i < sceneobjects.length; i++ ){
-				if( sceneobjects[i].id !== object.id &&
-					sceneobjects[i].material !== undefined &&
-					sceneobjects[i].material.id === material.id &&
-					(sceneobjects[i].receiveShadow || object.receiveShadow)){
+				if( sceneobject.id !== object.id &&
+					sceneobject.material !== undefined &&
+					sceneobject.material.id === material.id &&
+					(sceneobject.receiveShadow || object.receiveShadow)){
 
 					shadowNeedsUpdate =  true;
+					return;
 
 				}
-			}
+
+			} );
 
 		}
 
