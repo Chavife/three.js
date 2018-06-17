@@ -674,13 +674,13 @@ function WebGLRenderer( parameters ) {
 
 	};
 
-	this.renderBufferDirect = function ( camera, fog, geometry, material, object, group ) {
+	this.renderBufferDirect = function ( camera, fog, geometry, material, object, group, scene ) {
 
 		var frontFaceCW = ( object.isMesh && object.matrixWorld.determinant() < 0 );
 
 		state.setMaterial( material, frontFaceCW );
 
-		var program = setProgram( camera, fog, material, object );
+		var program = setProgram( camera, fog, material, object, scene );
 		var geometryProgram = geometry.id + '_' + program.id + '_' + ( material.wireframe === true );
 
 		var updateBuffers = false;
@@ -1409,7 +1409,7 @@ function WebGLRenderer( parameters ) {
 
 			state.setMaterial( material, frontFaceCW );
 
-			var program = setProgram( camera, scene.fog, material, object );
+			var program = setProgram( camera, scene.fog, material, object, scene );
 
 			_currentGeometryProgram = '';
 
@@ -1417,7 +1417,7 @@ function WebGLRenderer( parameters ) {
 
 		} else {
 
-			_this.renderBufferDirect( camera, scene.fog, geometry, material, object, group );
+			_this.renderBufferDirect( camera, scene.fog, geometry, material, object, group, scene );
 
 		}
 
@@ -1582,7 +1582,7 @@ function WebGLRenderer( parameters ) {
 
 	}
 
-	function setProgram( camera, fog, material, object ) {
+	function setProgram( camera, fog, material, object, scene ) {
 
 		_usedTextureUnits = 0;
 
@@ -1608,6 +1608,25 @@ function WebGLRenderer( parameters ) {
 
 		}
 
+		var shadowNeedsUpdate = false;
+		if(scene !== undefined){
+
+			var sceneobjects = scene.children;
+
+			for ( var i = 0; i < sceneobjects.length; i++ ){
+				if( sceneobjects[i].id !== object.id &&
+					sceneobjects[i].material !== undefined &&
+					sceneobjects[i].material.id === material.id &&
+					(sceneobjects[i].receiveShadow || object.receiveShadow)){
+
+					shadowNeedsUpdate =  true;
+
+				}
+			}
+
+		}
+
+
 		if ( material.needsUpdate === false ) {
 
 			if ( materialProperties.program === undefined ) {
@@ -1628,7 +1647,7 @@ function WebGLRenderer( parameters ) {
 
 				material.needsUpdate = true;
 
-			} else if ( object.receiveShadow ) {
+			} else if ( shadowNeedsUpdate ) {
 
 				material.needsUpdate = true;
 
